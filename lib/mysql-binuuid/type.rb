@@ -6,6 +6,21 @@ module MySQLBinUUID
       :uuid
     end
 
+    def deserialize(value)
+      return if value.nil?
+      return value if value.is_a?(MySQLBinUUID::Type::Data)
+      undashed_uuid = value.unpack1('H*')
+
+      # To avoid SQL injection, verify that it looks like a UUID. ActiveRecord
+      # does not explicity escape the Binary data type. escaping is implicit as
+      # the Binary data type always converts its value to a hex string.
+      unless valid_undashed_uuid?(undashed_uuid)
+        raise MySQLBinUUID::InvalidUUID, "#{value} is not a valid UUID"
+      end
+
+      Data.new(undashed_uuid)
+    end
+
     # Invoked when a value that is returned from the database needs to be
     # displayed into something readable again.
     def cast(value)
@@ -28,6 +43,7 @@ module MySQLBinUUID
     # it to the database.
     def serialize(value)
       return if value.nil?
+      return value if value.is_a?(MySQLBinUUID::Type::Data)
       undashed_uuid = strip_dashes(value)
 
       # To avoid SQL injection, verify that it looks like a UUID. ActiveRecord
@@ -53,9 +69,23 @@ module MySQLBinUUID
       def hex
         @value
       end
+
+      def to_s
+        add_dashes(@value)
+      end
+      alias_method :to_str, :to_s
+
+      def ==(other)
+        other == to_s || super
+      end
+
+      def add_dashes(uuid)
+        return uuid if uuid =~ /\-/
+        [uuid[0..7], uuid[8..11], uuid[12..15], uuid[16..19], uuid[20..-1]].join("-")
+      end
     end
 
-  private
+    private
 
     # A UUID consists of 5 groups of characters.
     #   8 chars - 4 chars - 4 chars - 4 chars - 12 characters
