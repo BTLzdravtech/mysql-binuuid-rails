@@ -18,7 +18,7 @@ module MySQLBinUUID
         raise MySQLBinUUID::InvalidUUID, "#{value} is not a valid UUID"
       end
 
-      Data.new(undashed_uuid)
+      Data.new(undashed_uuid).to_s
     end
 
     # Invoked when a value that is returned from the database needs to be
