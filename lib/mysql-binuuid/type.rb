@@ -6,34 +6,35 @@ module MySQLBinUUID
       :uuid
     end
 
-    def deserialize(value)
-      return if value.nil?
-      return value if value.is_a?(MySQLBinUUID::Type::Data)
-      undashed_uuid = value.unpack1('H*')
-
-      # To avoid SQL injection, verify that it looks like a UUID. ActiveRecord
-      # does not explicity escape the Binary data type. escaping is implicit as
-      # the Binary data type always converts its value to a hex string.
-      unless valid_undashed_uuid?(undashed_uuid)
-        raise MySQLBinUUID::InvalidUUID, "#{value} is not a valid UUID"
-      end
-
-      Data.new(undashed_uuid).to_s
-    end
-
     # Invoked when a value that is returned from the database needs to be
     # displayed into something readable again.
     def cast(value)
-      if value.is_a?(MySQLBinUUID::Type::Data)
-        # It could be a Data object, in which case we should add dashes to the
-        # string value from there.
-        add_dashes(value.to_s)
-      elsif value.is_a?(String) && value.encoding == Encoding::ASCII_8BIT && strip_dashes(value).length != 32
+      return value if value.is_a?(MySQLBinUUID::Type::Data)
+      if value.is_a?(String) && value.encoding == Encoding::ASCII_8BIT && strip_dashes(value).length != 32
         # We cannot unpack something that looks like a UUID, with or without
         # dashes. Not entirely sure why ActiveRecord does a weird combination of
         # cast and serialize before anything needs to be saved..
         undashed_uuid = value.unpack1('H*')
-        add_dashes(undashed_uuid.to_s)
+
+        # To avoid SQL injection, verify that it looks like a UUID. ActiveRecord
+        # does not explicity escape the Binary data type. escaping is implicit as
+        # the Binary data type always converts its value to a hex string.
+        unless valid_undashed_uuid?(undashed_uuid)
+          raise MySQLBinUUID::InvalidUUID, "#{value} is not a valid UUID"
+        end
+
+        Data.new(undashed_uuid)
+      elsif value.is_a?(String)
+        undashed_uuid = strip_dashes(value)
+
+        # To avoid SQL injection, verify that it looks like a UUID. ActiveRecord
+        # does not explicity escape the Binary data type. escaping is implicit as
+        # the Binary data type always converts its value to a hex string.
+        unless valid_undashed_uuid?(undashed_uuid)
+          raise MySQLBinUUID::InvalidUUID, "#{value} is not a valid UUID"
+        end
+
+        Data.new(undashed_uuid)
       else
         super
       end
@@ -76,7 +77,15 @@ module MySQLBinUUID
       alias_method :to_str, :to_s
 
       def ==(other)
-        other == to_s || super
+        other.to_s == to_s
+      end
+
+      def eql?(other)
+        other.to_s == to_s
+      end
+
+      def hash
+        to_s.hash
       end
 
       def add_dashes(uuid)
