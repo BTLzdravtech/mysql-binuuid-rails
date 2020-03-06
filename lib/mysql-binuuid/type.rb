@@ -19,9 +19,9 @@ module MySQLBinUUID
         # To avoid SQL injection, verify that it looks like a UUID. ActiveRecord
         # does not explicity escape the Binary data type. escaping is implicit as
         # the Binary data type always converts its value to a hex string.
-        unless valid_undashed_uuid?(undashed_uuid)
-          raise MySQLBinUUID::InvalidUUID, "#{value} is not a valid UUID"
-        end
+        # unless valid_undashed_uuid?(undashed_uuid)
+        #   raise MySQLBinUUID::InvalidUUID, "#{value} is not a valid UUID"
+        # end
 
         Data.new(undashed_uuid)
       elsif value.is_a?(String)
@@ -30,9 +30,9 @@ module MySQLBinUUID
         # To avoid SQL injection, verify that it looks like a UUID. ActiveRecord
         # does not explicity escape the Binary data type. escaping is implicit as
         # the Binary data type always converts its value to a hex string.
-        unless valid_undashed_uuid?(undashed_uuid)
-          raise MySQLBinUUID::InvalidUUID, "#{value} is not a valid UUID"
-        end
+        # unless valid_undashed_uuid?(undashed_uuid)
+        #   raise MySQLBinUUID::InvalidUUID, "#{value} is not a valid UUID"
+        # end
 
         Data.new(undashed_uuid)
       else
@@ -50,9 +50,9 @@ module MySQLBinUUID
       # To avoid SQL injection, verify that it looks like a UUID. ActiveRecord
       # does not explicity escape the Binary data type. escaping is implicit as
       # the Binary data type always converts its value to a hex string.
-      unless valid_undashed_uuid?(undashed_uuid)
-        raise MySQLBinUUID::InvalidUUID, "#{value} is not a valid UUID"
-      end
+      # unless valid_undashed_uuid?(undashed_uuid)
+      #   raise MySQLBinUUID::InvalidUUID, "#{value} is not a valid UUID"
+      # end
 
       Data.new(undashed_uuid)
     end
