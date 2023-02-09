@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir["**/*"].select { |f| File.file?(f) }
                           .reject { |f| f.end_with?(".gem") }
 
-  spec.required_ruby_version = ">= 2.6"
+  spec.required_ruby_version = ">= 2.7"
 
   spec.add_runtime_dependency "activerecord", ENV["RAILS_VERSION"] || ">= 5"
 
@@ -26,7 +26,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "mysql2"
   spec.add_development_dependency "minitest"
-  spec.add_development_dependency "minitest-spec-context"
-  spec.add_development_dependency "minitest-hooks"
   spec.add_development_dependency "rails", ENV["RAILS_VERSION"] || ">= 5" # required for a console
 end
